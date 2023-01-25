@@ -13,7 +13,8 @@ from ltr.models.loss.matcher import build_matcher
 from ltr.models.neck.featurefusion_network import build_featurefusion_network
 from ltr.models.neck.encoder_featurefusion_network import build_encoder_featurefusion_network
 from ltr.models.tracking.transt_seg import (TransTsegm, dice_loss, sigmoid_focal_loss)
-from ltr.models.tracking.transt_iouhead import TransTiouh
+# from ltr.models.tracking.transt_iouhead import TransTiouh
+from ltr.models.tracking.swin_transt_qkvcnn_encoderfusion_iouhead import SwinTransTiouh
 from ltr.models.tracking.transt_iouh_seg import TransTiouhsegm
 
 
@@ -327,10 +328,10 @@ def transt_swintranst(settings):
 
     if settings.iou_head:
         assert settings.masks == False
-        model = TransTiouh(model, freeze_transt=settings.freeze_transt)
+        model = SwinTransTiouh(model, freeze_transt=settings.freeze_transt)
     elif settings.masks:
         assert settings.iou_head == False
-        model = TransTiouh(model, freeze_transt=settings.freeze_transt)
+        model = SwinTransTiouh(model, freeze_transt=settings.freeze_transt)
         model = TransTiouhsegm(model, freeze_transt=settings.freeze_transt)
 
     device = torch.device(settings.device)

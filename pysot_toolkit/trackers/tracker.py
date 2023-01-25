@@ -185,7 +185,7 @@ class Tracker(object):
 
     def initialize(self, image, info: dict) -> dict:
         tic = time.time()
-        hanning = np.hanning(32)
+        hanning = np.hanning(16)
         window = np.outer(hanning, hanning)
         self.window = window.flatten()
         # Initialize
@@ -249,7 +249,10 @@ class Tracker(object):
         outputs = self.net.track(x_crop, self.templates_list)
         score = self._convert_score(outputs['pred_logits'])
         pred_bbox = self._convert_bbox(outputs['pred_boxes'])
-        iou = self._convert_iou(outputs['pred_iouh'])
+        iou_flag = False
+        if outputs.get('pred_iouh', None) is not None:
+            iou = self._convert_iou(outputs['pred_iouh'])
+            iou_flag = True
         # def change(r):
         #     return np.maximum(r, 1. / r)
         #
@@ -307,12 +310,20 @@ class Tracker(object):
         if mask_flag == True:
             out['target_mask'] = final_mask
         # print(iou[best_idx])
-        if iou[best_idx] > self.update_threshold:
-            self.update(image, out)
+        if iou_flag:
+            if iou[best_idx] > self.update_threshold:
+                self.update(image, out)
+        else:
+            if info.get("idx") % self.update_threshold == 0:
+                self.update(image, info)
+
         return out
 
     def update(self, image, info: dict):
-        bbox = info['target_bbox']
+        if info.get('gt_bbox') is None:
+            bbox = info['target_bbox']
+        else:
+            bbox = info['gt_bbox']
         self.center_pos = np.array([bbox[0] + bbox[2] / 2,
                                     bbox[1] + bbox[3] / 2])
         self.size = np.array([bbox[2], bbox[3]])
