@@ -24,13 +24,20 @@ from pysot_toolkit.trackers.tracker import Tracker
 from pysot_toolkit.trackers.net_wrappers import NetWithBackbone
 
 parser = argparse.ArgumentParser(description='siamrpn tracking')
-parser.add_argument('--dataset', type=str, default='OTB100',
+parser.add_argument('--dataset', type=str, 
+        # default='OTB100',
+        default='GOT-10k',
         help='datasets')
 parser.add_argument('--video', default='', type=str,
         help='eval one special video')
 parser.add_argument('--vis', action='store_true',
         help='whether visualzie result')
-parser.add_argument('--name', default='SwinTransT-M_ep0340_gt_update', type=str,
+parser.add_argument('--name', 
+        # default='SwinTransT-M_ep0340_iouhead_ep0090_test_0.79', 
+        # default='SwinTransT-M_biglr_ep0500_iouhead_ep0090_test_0.80_w_0.52', 
+        default='SwinTransT-M_biglr_ep0500_iouhead_biglr_ep0090_test_0.80_w_0.52_test', 
+        # default='SwinTransT-M_biglr_ep0500', 
+        type=str,
         help='name of results')
 parser.add_argument('--mask', action='store_true',
         help='whether predict mask')
@@ -43,23 +50,29 @@ torch.set_num_threads(1)
 def main():
     # load config
 
-    # dataset_root = '/data/full_data/test'
-    dataset_root = '/data/OTB100'
+    dataset_root = '/data/full_data/test'
+    # dataset_root = '/data/OTB100'
     # dataset_root = '/home/cx/detr-tracking-v6/testing_dataset/VOT2019'
     # dataset_root = '/home/cx/cx2/LaSOTBenchmark'
     # dataset_root = '/home/cx/cx2/TrackingNet/TEST/frames'
     # dataset_root = '/home/cx/cx2/OTB100'
     # dataset_root = '/home/cx/cx2/Downloads/nfs'
     # dataset_root = '/home/cx/cx2/Downloads/UAV123/UAV123_fix/Dataset_UAV123/UAV123/data_seq/UAV123'
-    net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M/SwinTransT_ep0340.pth.tar'
+
+    # net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M/SwinTransT_ep0463.pth.tar'
+    # net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M_biglr/SwinTransT_ep0500.pth.tar'
+    # net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT_Cvt_iouhead_transfer/SwinTransT_biglr_ep0463_iouhead_transfer.pth'
+    # net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT_Cvt_iouhead/checkpoints/SwinTransTiouh_ep0090.pth.tar'
     # net_path = '/home/xlsun/xlsun/code/TransT/results/SwinTransT_cvt_biglr/SwinTransT_ep0500.pth.tar' 
+    # net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M_Cvt_iouhead_biglr/SwinTransTiouh_ep0090.pth.tar' 
+    net_path = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M_Cvt_biglr_iouhead_biglr/SwinTransTiouh_ep0090.pth.tar' 
     # net_path = '/home/cx/TransT/models/transt.pth'
 
     # create model
     net = NetWithBackbone(net_path=net_path, use_gpu=True)
     tracker = Tracker(name='debug', net=net, mask=args.mask,
                       window_penalty=0.52, penalty_k=0, iou_alpha=0,
-                      update_threshold=20, exemplar_size=128, instance_size=256)
+                      update_threshold=0.80, exemplar_size=128, instance_size=256)
 
     # create dataset
     dataset = DatasetFactory.create_dataset(name=args.dataset,

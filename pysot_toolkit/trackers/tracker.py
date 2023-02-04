@@ -315,7 +315,7 @@ class Tracker(object):
                 self.update(image, out)
         else:
             if info.get("idx") % self.update_threshold == 0:
-                self.update(image, info)
+                self.update(image, out)
 
         return out
 

@@ -48,7 +48,8 @@ def main():
                         type=str, help='Name of module in the "train_settings/" folder.')
     parser.add_argument('--train_name', 
                         # default='swin_transt_qkvcnn_encoderfusion',
-                        default='swin_transt_qkvcnn_encoderfusion_iouhead',
+                        # default='swin_transt_qkvcnn_encoderfusion_iouhead',
+                        default='swin_transt_qkvcnn_enhance_encoderfusion_dwconv',
                         type=str, help='Name of the train settings file.')
     parser.add_argument('--cudnn_benchmark', type=bool, default=True, help='Set cudnn benchmark on (1) or off (0) (default is on).')
 

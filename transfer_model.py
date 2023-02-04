@@ -43,22 +43,51 @@ import collections
 # net = model['net']
 # torch.save(net, '/home/cx/cx1/trdimp.pth')
 
-path1 = '/home/cx/cx1/work_dir/work_dir_mt_2t_e464_iou/checkpoints/ltr/transt/transt_ddp/TransTiouh_ep0090.pth.tar'
-path2 = '/home/cx/cx1/work_dir/work_dir_mt_2t_e491_iou/checkpoints/ltr/transt/transt_iouh_ddp/TransTiouh_ep0090.pth.tar'
+# path1 = '/home/cx/cx1/work_dir/work_dir_mt_2t_e464_iou/checkpoints/ltr/transt/transt_ddp/TransTiouh_ep0090.pth.tar'
+# path1 = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M/SwinTransT_ep0500.pth.tar'
+# path2 = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT_Cvt_iouhead/checkpoints/SwinTransTiouh_ep0066.pth.tar'
+# model1 = torch.load(path1)
+# model2 = torch.load(path2)
+# net1 = model1['net']
+# net2 = model2['net']
+# model3 = {}
+# net3 = collections.OrderedDict()
+# for key in net1.keys():
+#     if key[0:6] == 'transt':
+#         net3[key[7:]] = net1[key]
+#     else:
+#         net3[key] = net1[key]
+
+# model3['net'] = net3
+# model3['constructor'] = model2['constructor']
+# torch.save(model3, '/home/cx/cx1/e461e90.pth')
+
+
+# path1 = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M/SwinTransT_ep0500.pth.tar'
+path1 = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT-M_biglr/SwinTransT_ep0463.pth.tar'
+path2 = '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT_Cvt_iouhead/checkpoints/SwinTransTiouh_ep0066.pth.tar'
 model1 = torch.load(path1)
 model2 = torch.load(path2)
 net1 = model1['net']
 net2 = model2['net']
+
+net1_keys = set(net1.keys())
+net2_keys = set(net2.keys())
+
+iouh_keys = list(net2_keys.difference(net1_keys))
+
 model3 = {}
 net3 = collections.OrderedDict()
-for key in net1.keys():
-    if key[0:6] == 'transt':
-        net3[key[7:]] = net1[key]
-    else:
-        net3[key] = net1[key]
+# for key in net1.keys():
+#     if key[0:6] == 'transt':
+#         net3[key[7:]] = net1[key]
+#     else:
+#         net3[key] = net1[key]
+net3 = net1.copy()
+for key in iouh_keys:
+    net3[key] = net2[key]
 
 model3['net'] = net3
 model3['constructor'] = model2['constructor']
-torch.save(model3, '/home/cx/cx1/e461e90.pth')
-
+torch.save(model3, '/home/xlsun/xlsun/code/TransT-M/results/SwinTransT_Cvt_iouhead_transfer/SwinTransT_biglr_ep0463_iouhead_transfer.pth')
 

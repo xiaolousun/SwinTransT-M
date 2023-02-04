@@ -142,6 +142,18 @@ class SwintranstCvt_Backbone(BackboneBase):
         num_channels = None
         super().__init__(backbone, num_channels)
 
+class SwintranstCvtClean_Backbone(BackboneBase):
+    """ResNet backbone with frozen BatchNorm."""
+    def __init__(self,
+                 output_layers,
+                 frozen_stages,
+                 pretrained_model_path,
+                 **params):
+        backbone = backbones.SwinTransformer_cvt_clean(out_indices=output_layers, frozen_stages=frozen_stages, **params)
+        backbone.init_weights(pretrained_model_path)
+        num_channels = None
+        super().__init__(backbone, num_channels)
+
 
 class Joiner(nn.Sequential):
     def __init__(self, backbone, position_embedding):
@@ -298,6 +310,33 @@ def build_swin_transformer_cvt_backbone(settings, name, load_pretrained=False, o
 
     position_embedding = build_position_encoding(settings)
     backbone = SwintranstCvt_Backbone(output_layers, frozen_stages, pretrained_model_path, **params)
+    backbone.num_channels = params['embed_dim'] * 2 ** (max(output_layers))
+    model = Joiner(backbone, position_embedding)
+    model.num_channels = backbone.num_channels
+
+    return model, max(output_layers)
+
+def build_swin_transformer_cvt_clean_backbone(settings, name, load_pretrained=False, output_layers=(3,), frozen_stages=-1,
+                                    overwrite_embed_dim=None):
+    import copy
+    from .swin_transformer_qkvcnn import _cfg
+
+    pretrained_model_path = None
+    if load_pretrained and 'url' in _cfg[name]:
+        pretrained_model_path = _cfg[name]['url']
+
+    max_output_index = max(output_layers)
+    params = copy.deepcopy(_cfg[name]['params'])
+    if max_output_index < 3:
+        params['depths'] = params['depths'][0: max_output_index + 1]
+        params['num_heads'] = params['num_heads'][0: max_output_index + 1]
+
+    if overwrite_embed_dim is not None:
+        params['embed_dim'] = overwrite_embed_dim
+        pretrained_model_path = None
+
+    position_embedding = build_position_encoding(settings)
+    backbone = SwintranstCvtClean_Backbone(output_layers, frozen_stages, pretrained_model_path, **params)
     backbone.num_channels = params['embed_dim'] * 2 ** (max(output_layers))
     model = Joiner(backbone, position_embedding)
     model.num_channels = backbone.num_channels
